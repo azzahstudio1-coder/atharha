@@ -178,8 +178,7 @@ function account() {
     </div>
     <div class="field"><label for="f-ref">كود دعوة (اختياري)</label><input id="f-ref" dir="ltr" maxlength="12" placeholder="AZH-1234" value="${esc(ref)}"></div>
     <span class="eyebrow">صحتك (اختياري)</span>
-    <div class="field"><label>هل عندك أي من هذي الحالات؟</label><div class="chips" id="health">${HEALTH.map(h => `<button type="button" class="chip" aria-pressed="${(u.health || []).includes(h)}">${h}</button>`).join('')}</div><small>لا تُعرض لأحد، وتُستخدم في البحث بدون اسمك.</small></div>
-    <label class="consent"><input type="checkbox" id="f-consent" ${u.consent ? 'checked' : ''}><span>أوافق على حفظ بياناتي واستخدامها بدون اسمي في بحث علمي عن التعرّض لمواد PFAS، كما في <a href="privacy.html" target="_blank" rel="noopener">سياسة الخصوصية</a>، وأقدر أحذف حسابي في أي وقت.<span id="minor" hidden> وبما إن عمري أقل من 18، وافق ولي أمري على مشاركتي.</span></span></label>
+    <label class="consent"><input type="checkbox" id="f-consent" ${u.consent ? 'checked' : ''}><span>أوافق على حفظ بياناتي واستخدامها بدون اسمي في دراسة بيئية توعوية عن التعرّض لمواد PFAS في البيوت، كما في <a href="privacy.html" target="_blank" rel="noopener">سياسة الخصوصية</a>، وأقدر أحذف حسابي في أي وقت.<span id="minor" hidden> وبما إن عمري أقل من 18، وافق ولي أمري على مشاركتي.</span></span></label>
     <span class="err" id="e-consent"></span>
     <button class="btn sea" type="submit" id="acc-btn">التالي: الأسئلة</button>
   </form>
@@ -419,16 +418,11 @@ function render() {
 
 function bindAccount() {
   const age = $('#f-age'), minor = $('#minor'); const upd = () => minor.hidden = age.value !== 'أقل من 18'; age.addEventListener('change', upd); upd();
-  $('#health').addEventListener('click', e => {
-    const b = e.target.closest('.chip'); if (!b) return; const on = b.getAttribute('aria-pressed') !== 'true'; const excl = /لا يوجد|أفضّل/;
-    $('#health').querySelectorAll('.chip').forEach(c => { if (on && (excl.test(b.textContent) || excl.test(c.textContent))) c.setAttribute('aria-pressed', 'false') });
-    b.setAttribute('aria-pressed', on)
-  });
   $('#acc').addEventListener('submit', async e => {
     e.preventDefault();
     const v = {
       name: $('#f-name').value.trim(), email: $('#f-email').value.trim().toLowerCase(), phone: $('#f-phone').value.replace(/\s/g, ''), age: age.value, edu: $('#f-edu').value, fam: $('#f-fam').value, dist: $('#f-dist').value.trim(), ref: $('#f-ref').value.trim(),
-      health: [...$('#health').querySelectorAll('[aria-pressed="true"]')].map(c => c.textContent), consent: $('#f-consent').checked
+      health: [], consent: $('#f-consent').checked
     };
     S.draft = v; let ok = true;
     const chk = (id, cond, msg) => { $('#e-' + id).textContent = cond ? '' : msg; const inp = $('#f-' + id); if (inp) inp.classList.toggle('bad', !cond); if (!cond) ok = false };
